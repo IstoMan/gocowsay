@@ -90,7 +90,7 @@ func findMaxWidth(lines []string) int {
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("No text given")
+		fmt.Println("No text given, the example usage is: ")
 		fmt.Println(`gosay "-----"`)
 		return
 	}
