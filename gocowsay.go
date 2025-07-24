@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"unicode/utf8"
 )
@@ -11,10 +12,10 @@ var errEmptyString = errors.New("cannot take empty string")
 
 const maxWidth = 39
 
-func Inflator(lines []string) []string {
+func Inflator(lines []string, maxwidth int) []string {
 	var ret []string
 	for _, l := range lines {
-		s := l + strings.Repeat(" ", maxWidth-utf8.RuneCountInString(l))
+		s := l + strings.Repeat(" ", maxwidth-utf8.RuneCountInString(l))
 		ret = append(ret, s)
 	}
 	return ret
@@ -44,21 +45,20 @@ func Spiltter(text string) []string {
 	return lines
 }
 
-func DialogueBox(lines []string) []string {
+func DialogueBox(lines []string, maxwidth int) string {
 	var ret []string
+	count := len(lines)
 
-	top := " " + strings.Repeat("_", maxWidth+2)
-	bottom := " " + strings.Repeat("-", maxWidth+2)
+	top := " " + strings.Repeat("_", maxwidth+2)
+	bottom := " " + strings.Repeat("-", maxwidth+2)
 
 	ret = append(ret, top)
-	count := len(lines)
 
 	borders := [5]string{"/", "\\", "<", ">", "|"}
 
 	if count == 1 {
 		s := fmt.Sprintf("%s %s %s", borders[2], lines[0], borders[3])
 		ret = append(ret, s)
-		return ret
 	} else {
 		s := fmt.Sprintf("%s %s %s", borders[0], lines[0], borders[1])
 		ret = append(ret, s)
@@ -76,15 +76,39 @@ func DialogueBox(lines []string) []string {
 
 	ret = append(ret, bottom)
 
-	return ret
+	return strings.Join(ret, "\n")
+}
+
+func findMaxWidth(lines []string) int {
+	retMaxWidth := maxWidth
+	for _, line := range lines {
+		if len(line) < maxWidth {
+			retMaxWidth = len(line)
+		}
+	}
+	return retMaxWidth
 }
 
 func main() {
-	inputString := "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do"
-	lines := Spiltter(inputString)
-	padded := Inflator(lines)
-	boxed := DialogueBox(padded)
-	for _, line := range boxed {
-		fmt.Println(line)
+	if len(os.Args) < 2 {
+		fmt.Println("No text given")
+		fmt.Println(`gosay "-----"`)
+		return
 	}
+
+	inputString := strings.Join(os.Args[1:], " ")
+	lines := Spiltter(inputString)
+	maxwidth := findMaxWidth(lines)
+	padded := Inflator(lines, maxwidth)
+	boxed := DialogueBox(padded, maxwidth)
+
+	cow := `         \  ^__^
+          \ (oo)\_______
+	    (__)\       )\/\
+	        ||----w |
+	        ||     ||
+		`
+
+	fmt.Println(boxed)
+	fmt.Println(cow)
 }
