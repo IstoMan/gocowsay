@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"unicode/utf8"
 )
 
 var errEmptyString = errors.New("cannot take empty string")
@@ -15,7 +14,7 @@ const maxWidth = 39
 func Inflator(lines []string, maxwidth int) []string {
 	var ret []string
 	for _, l := range lines {
-		s := l + strings.Repeat(" ", maxwidth-utf8.RuneCountInString(l))
+		s := l + strings.Repeat(" ", maxwidth-len(l))
 		ret = append(ret, s)
 	}
 	return ret
