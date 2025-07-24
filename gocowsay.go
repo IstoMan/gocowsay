@@ -46,28 +46,35 @@ func Spiltter(text string) []string {
 
 func DialogueBox(lines []string) []string {
 	var ret []string
-	top := strings.Repeat("-", maxWidth)
+
+	top := " " + strings.Repeat("_", maxWidth+2)
+	bottom := " " + strings.Repeat("-", maxWidth+2)
+
 	ret = append(ret, top)
 	count := len(lines)
 
 	borders := [5]string{"/", "\\", "<", ">", "|"}
 
-	for i, line := range lines {
-		if count > 1 {
-			if i == 0 {
-				s := borders[0] + line + borders[1]
-				ret = append(ret, s)
-			}
-			s := borders[4] + line + borders[4]
+	if count == 1 {
+		s := fmt.Sprintf("%s %s %s", borders[2], lines[0], borders[3])
+		ret = append(ret, s)
+		return ret
+	} else {
+		s := fmt.Sprintf("%s %s %s", borders[0], lines[0], borders[1])
+		ret = append(ret, s)
+
+		i := 1
+
+		for ; i < count-1; i++ {
+			s := fmt.Sprintf("%s %s %s", borders[4], lines[i], borders[4])
 			ret = append(ret, s)
-			if i == len(lines)-1 {
-				s := borders[1] + line + borders[0]
-				ret = append(ret, s)
-			}
 		}
+
+		s = fmt.Sprintf("%s %s %s", borders[1], lines[i], borders[0])
+		ret = append(ret, s)
 	}
 
-	ret = append(ret, top)
+	ret = append(ret, bottom)
 
 	return ret
 }
