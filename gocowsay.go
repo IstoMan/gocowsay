@@ -9,7 +9,10 @@ import (
 	"unicode/utf8"
 )
 
-var errEmptyString = errors.New("No text given to say.")
+var (
+	errEmptyString   = errors.New("No text given to say.")
+	errInvalidOption = errors.New("Invalid option, no such option.")
+)
 
 const maxWidth = 39
 
@@ -98,7 +101,7 @@ func findMaxWidth(lines []string) int {
 	return retMaxWidth
 }
 
-func cowSelected(option string) string {
+func cowSelected(option string) (string, error) {
 	var ret string
 	switch option {
 	case "cow":
@@ -120,8 +123,10 @@ func cowSelected(option string) string {
     /'\\_   _/'\
     \\___)=(___/
 		`
+	default:
+		return "", errInvalidOption
 	}
-	return ret
+	return ret, nil
 }
 
 func main() {
@@ -130,14 +135,19 @@ func main() {
 
 	inputString := strings.Join(flag.Args(), " ")
 
-	if strings.TrimSpace(inputString) == "" {
+	if len(inputString) == 0 {
 		fmt.Fprintln(os.Stderr, errEmptyString)
 		fmt.Fprintln(os.Stderr, "Usage: gosay [flags] <text to say>")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
-	cow := cowSelected(*cowChar)
+	cow, err := cowSelected(*cowChar)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
 
 	sanitizedText := SanitizeSpaces(inputString)
 	lines := Spiltter(sanitizedText)
