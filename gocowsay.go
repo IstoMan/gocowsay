@@ -112,9 +112,8 @@ func cowSelected(option string) (string, error) {
 	        ||     ||
 		`
 	case "tux":
-		ret = ` 
-   \
-    \
+		ret = ` \
+  \
         .--.
        |o o |
        |:_/ |
