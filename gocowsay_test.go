@@ -17,10 +17,23 @@ func TestSpiltter(t *testing.T) {
 
 func TestInflator(t *testing.T) {
 	inputList := Spiltter(inputText)
-	got := Inflator(inputList)
+	got := Inflator(inputList, maxWidth)
 	want := []string{inputList[0] + strings.Repeat(" ", maxWidth-len(inputList[0])), inputList[1] + strings.Repeat(" ", maxWidth-len(inputList[1]))}
 
 	assertErrors(t, got, want)
+}
+
+func TestSanitizeSpaces(t *testing.T) {
+	inputString := `Lorem ipsum dolor sit amet, consectetur
+elit, sed do eiusmod tempor incididunt ut labore
+dolore magna aliqua. Ut enim ad minim veniam,
+`
+	got := SanitizeSpaces(inputString)
+	want := "Lorem ipsum dolor sit amet, consectetur elit, sed do eiusmod tempor incididunt ut labore dolore magna aliqua. Ut enim ad minim veniam, "
+
+	if got != want {
+		t.Errorf("Got this string \"%s\" but want \"%s\"", got, want)
+	}
 }
 
 func assertErrors(t testing.TB, got, want []string) {

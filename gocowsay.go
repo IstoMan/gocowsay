@@ -5,16 +5,24 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 var errEmptyString = errors.New("cannot take empty string")
 
 const maxWidth = 39
 
+func SanitizeSpaces(text string) string {
+	ret := strings.ReplaceAll(text, "\n", " ")
+	ret = strings.ReplaceAll(ret, "\t", " ")
+
+	return ret
+}
+
 func Inflator(lines []string, maxwidth int) []string {
 	var ret []string
 	for _, l := range lines {
-		s := l + strings.Repeat(" ", maxwidth-len(l))
+		s := l + strings.Repeat(" ", maxwidth-utf8.RuneCountInString(l))
 		ret = append(ret, s)
 	}
 	return ret
@@ -26,7 +34,7 @@ func Spiltter(text string) []string {
 	var currentline string
 
 	for word := range words {
-		if len(currentline)+len(word)+1 > maxWidth {
+		if utf8.RuneCountInString(currentline)+utf8.RuneCountInString(word)+1 > maxWidth {
 			lines = append(lines, currentline)
 			currentline = word
 		} else {
@@ -81,8 +89,9 @@ func DialogueBox(lines []string, maxwidth int) string {
 func findMaxWidth(lines []string) int {
 	retMaxWidth := maxWidth
 	for _, line := range lines {
-		if len(line) < maxWidth {
-			retMaxWidth = len(line)
+		lineWidth := utf8.RuneCountInString(line)
+		if lineWidth > retMaxWidth {
+			retMaxWidth = lineWidth
 		}
 	}
 	return retMaxWidth
@@ -96,7 +105,8 @@ func main() {
 	}
 
 	inputString := strings.Join(os.Args[1:], " ")
-	lines := Spiltter(inputString)
+	sanitizedText := SanitizeSpaces(inputString)
+	lines := Spiltter(sanitizedText)
 	maxwidth := findMaxWidth(lines)
 	padded := Inflator(lines, maxwidth)
 	boxed := DialogueBox(padded, maxwidth)
