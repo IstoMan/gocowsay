@@ -2,13 +2,14 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
 	"unicode/utf8"
 )
 
-var errEmptyString = errors.New("cannot take empty string")
+var errEmptyString = errors.New("No text given to say.")
 
 const maxWidth = 39
 
@@ -87,7 +88,7 @@ func DialogueBox(lines []string, maxwidth int) string {
 }
 
 func findMaxWidth(lines []string) int {
-	retMaxWidth := maxWidth
+	retMaxWidth := 0
 	for _, line := range lines {
 		lineWidth := utf8.RuneCountInString(line)
 		if lineWidth > retMaxWidth {
@@ -97,26 +98,52 @@ func findMaxWidth(lines []string) int {
 	return retMaxWidth
 }
 
-func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("No text given, the example usage is: ")
-		fmt.Println(`gosay "-----"`)
-		return
-	}
-
-	inputString := strings.Join(os.Args[1:], " ")
-	sanitizedText := SanitizeSpaces(inputString)
-	lines := Spiltter(sanitizedText)
-	maxwidth := findMaxWidth(lines)
-	padded := Inflator(lines, maxwidth)
-	boxed := DialogueBox(padded, maxwidth)
-
-	cow := `         \  ^__^
+func cowSelected(option string) string {
+	var ret string
+	switch option {
+	case "cow":
+		ret = `         \  ^__^
           \ (oo)\_______
 	    (__)\       )\/\
 	        ||----w |
 	        ||     ||
 		`
+	case "tux":
+		ret = ` 
+   \
+    \
+        .--.
+       |o o |
+       |:_/ |
+      //    \\ 
+     (|     | )
+    /'\\_   _/'\
+    \\___)=(___/
+		`
+	}
+	return ret
+}
+
+func main() {
+	cowChar := flag.String("f", "cow", "Character to display. Use 'tux' for Tux.")
+	flag.Parse()
+
+	inputString := strings.Join(flag.Args(), " ")
+
+	if strings.TrimSpace(inputString) == "" {
+		fmt.Fprintln(os.Stderr, errEmptyString)
+		fmt.Fprintln(os.Stderr, "Usage: gosay [flags] <text to say>")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	cow := cowSelected(*cowChar)
+
+	sanitizedText := SanitizeSpaces(inputString)
+	lines := Spiltter(sanitizedText)
+	maxwidth := findMaxWidth(lines)
+	padded := Inflator(lines, maxwidth)
+	boxed := DialogueBox(padded, maxwidth)
 
 	fmt.Println(boxed)
 	fmt.Println(cow)
